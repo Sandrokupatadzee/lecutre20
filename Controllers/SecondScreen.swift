@@ -10,8 +10,7 @@ import UIKit
 class SecondScreen: UIViewController {
     
     private var country: Country
-    private var maps: Maps?
-
+    
     private let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -324,20 +323,23 @@ class SecondScreen: UIViewController {
         return line
     }()
     
-    private let googleMapsButton: UIButton = {
+    private lazy var googleMapsButton: UIButton = {
         let button = UIButton(type: .custom)
         button.setImage(UIImage(named: "googleMap"), for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addAction(UIAction(handler: {_ in
+            self.googleMapButtonTapped()
+        }), for: .touchUpInside)
         return button
     }()
     
-    private let openStreetMapsButton: UIButton = {
+    private lazy var openStreetMapsButton: UIButton = {
         let button = UIButton(type: .custom)
         button.setImage(UIImage(named: "streetMap"), for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addAction(UIAction(handler: {_ in
+            //                    self.streetMapButtonTapped()
+        }), for: .touchUpInside)
         return button
     }()
-    
     
     private let linkTitle: UILabel = {
         let label = UILabel()
@@ -348,8 +350,7 @@ class SecondScreen: UIViewController {
     }()
     
     
-//    MARK: initialisation
-    
+    //    MARK: initialisation
     
     init(_ country: Country) {
         self.country = country
@@ -367,13 +368,8 @@ class SecondScreen: UIViewController {
         title = "Details"
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.largeTitleDisplayMode = .always
-        
         configure(with: country)
         setupScrollView()
-        
-        googleMapsButton.addTarget(self, action: #selector(openGoogleMaps), for: .touchUpInside)
-        openStreetMapsButton.addTarget(self, action: #selector(openOpenStreetMaps), for: .touchUpInside)
-
     }
     
     private func setupScrollView() {
@@ -390,7 +386,7 @@ class SecondScreen: UIViewController {
         self.contentView.addSubview(linkTitle)
         self.contentView.addSubview(googleMapsButton)
         self.contentView.addSubview(openStreetMapsButton)
-
+        
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         contentView.translatesAutoresizingMaskIntoConstraints = false
         countryFlag.translatesAutoresizingMaskIntoConstraints = false
@@ -403,7 +399,7 @@ class SecondScreen: UIViewController {
         linkTitle.translatesAutoresizingMaskIntoConstraints = false
         googleMapsButton.translatesAutoresizingMaskIntoConstraints = false
         openStreetMapsButton.translatesAutoresizingMaskIntoConstraints = false
-
+        
         let height = contentView.heightAnchor.constraint(equalTo: scrollView.heightAnchor)
         height.priority = UILayoutPriority(1)
         height.isActive = true
@@ -426,8 +422,7 @@ class SecondScreen: UIViewController {
             countryFlag.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
             countryFlag.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
             countryFlag.heightAnchor.constraint(equalToConstant: 200),
-            countryFlag.widthAnchor.constraint(equalToConstant: 450),
-
+            
             flagTitle.topAnchor.constraint(equalTo: countryFlag.bottomAnchor, constant: 15),
             flagTitle.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 10),
             flagTitle.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
@@ -464,14 +459,22 @@ class SecondScreen: UIViewController {
             openStreetMapsButton.widthAnchor.constraint(equalTo: googleMapsButton.widthAnchor),
             openStreetMapsButton.heightAnchor.constraint(equalTo: googleMapsButton.heightAnchor),
             
-            googleMapsButton.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 67),
-            openStreetMapsButton.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -67),
+            googleMapsButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 67),
             openStreetMapsButton.leadingAnchor.constraint(equalTo: googleMapsButton.trailingAnchor, constant: 115),
             
-            googleMapsButton.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor),
-            openStreetMapsButton.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor),
-
+            googleMapsButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            openStreetMapsButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            
         ])
+        
+        googleMapsButton.addAction(UIAction(handler: {_ in
+            print("Google Maps URL not found")
+            self.googleMapButtonTapped()
+        }), for: .touchUpInside)
+        
+        openStreetMapsButton.addAction(UIAction(handler: {_ in
+            self.streetMapButtonTapped()
+        }), for: .touchUpInside)
     }
     
     public func configure(with country: Country) {
@@ -501,18 +504,20 @@ class SecondScreen: UIViewController {
         }.resume()
     }
     
-    @objc private func openGoogleMaps() {
-        if let googleMapsURL = maps?.googleMaps, let url = URL(string: googleMapsURL) {
-            UIApplication.shared.open(url, options: [:], completionHandler: nil)
-        } else {
+    func googleMapButtonTapped() {
+        if let url = URL(string: country.maps.googleMaps) {
+            UIApplication.shared.open(url)
+        }
+        else {
             print("Google Maps URL not found")
         }
     }
     
-    @objc private func openOpenStreetMaps() {
-        if let openStreetMapsURL = maps?.openStreetMaps, let url = URL(string: openStreetMapsURL) {
-            UIApplication.shared.open(url, options: [:], completionHandler: nil)
-        } else {
+    func streetMapButtonTapped() {
+        if let url = URL(string: country.maps.openStreetMaps) {
+            UIApplication.shared.open(url)
+        }
+        else {
             print("OpenStreetMaps URL not found")
         }
     }

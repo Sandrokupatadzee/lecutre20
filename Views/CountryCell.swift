@@ -102,5 +102,4 @@ class CountryCell: UITableViewCell {
             ]
             return NSAttributedString(string: text, attributes: strokeTextAttributes)
         }
-    
 }
